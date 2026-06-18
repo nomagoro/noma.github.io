@@ -6,14 +6,14 @@
 <title>P4 カンペ</title>
 <style>
 :root {
-  --bg:#0b1020;
-  --panel:#151b2d;
-  --panel2:#222c46;
-  --text:#f6f8ff;
-  --muted:#b3bdcf;
+  --bg:#0f1117;
+  --panel:#171a23;
+  --panel2:#202431;
+  --text:#f2f4f8;
+  --muted:#9aa3b2;
   --accent:#7fc7ff;
-  --danger:#ff6b6b;
-  --ok:#74e39a;
+  --danger:#d15b5b;
+  --ok:#8bd17c;
   --border:#44506a;
 }
 * { box-sizing:border-box; }
@@ -33,9 +33,9 @@ header {
   position:sticky;
   top:0;
   z-index:20;
-  background:rgba(11,16,32,.96);
+  background:rgba(15,17,23,.96);
   backdrop-filter:blur(10px);
-  border-bottom:1px solid #3a4660;
+  border-bottom:1px solid #2d3342;
   padding:7px 0;
   margin-bottom:8px;
 }
@@ -55,7 +55,7 @@ h1 {
   padding:4px 12px;
   border:1px solid rgba(209,91,91,.45);
   border-radius:8px;
-  background:rgba(255,107,107,.14);
+  background:rgba(209,91,91,.12);
   color:#ffdede;
   font-size:13px;
   font-weight:850;
@@ -63,14 +63,14 @@ h1 {
 .block {
   background:var(--panel);
   border:1px solid var(--border);
-  border-left:5px solid #44506a;
+  border-left:5px solid #343948;
   border-radius:10px;
   padding:8px;
   margin-bottom:8px;
 }
 .block.done {
   border-left-color:var(--accent);
-  background:#192744;
+  background:#1b2230;
 }
 .block-head {
   display:flex;
@@ -82,7 +82,7 @@ h1 {
 .block-title {
   font-size:16px;
   font-weight:900;
-  color:#eef4ff;
+  color:#dfe5f2;
 }
 .block-state {
   min-width:0;
@@ -129,22 +129,22 @@ button {
   min-height:38px;
   padding:4px 3px;
   font-size:13px;
-  font-weight:950;
+  font-weight:900;
   line-height:1.05;
   touch-action:manipulation;
 }
 button.selected {
   background:#2f7fe8;
-  border-color:#b7d8ff;
+  border-color:#9db7ff;
   color:white;
 }
 button.true.selected {
   background:#246ee6;
-  border-color:#b7d8ff;
+  border-color:#9db7ff;
 }
 button.false.selected {
   background:#d84f5a;
-  border-color:#ffb8b8;
+  border-color:#e6a0a0;
 }
 button:disabled {
   opacity:.28;
@@ -182,8 +182,8 @@ button:disabled {
   right:0;
   bottom:0;
   z-index:30;
-  background:linear-gradient(to top,rgba(11,16,32,1),rgba(11,16,32,.96));
-  border-top:1px solid #3a4660;
+  background:linear-gradient(to top,rgba(15,17,23,1),rgba(15,17,23,.95));
+  border-top:1px solid #2d3342;
   padding:7px 8px 8px;
 }
 .output-inner {
@@ -205,20 +205,20 @@ button:disabled {
 }
 .result-row {
   display:grid;
-  grid-template-columns:58px 1fr;
+  grid-template-columns:56px 1fr;
   gap:6px;
   align-items:center;
   min-height:25px;
   background:var(--panel);
   border:1px solid var(--border);
   border-radius:8px;
-  padding:4px 7px;
+  padding:3px 6px;
 }
 .result-row.done {
   border-color:rgba(116,227,154,.75);
 }
 .result-name {
-  color:#eef4ff;
+  color:#dfe5f2;
   font-size:11px;
   font-weight:950;
 }
@@ -240,8 +240,8 @@ button:disabled {
 .warn {
   display:none;
   color:#ffdede;
-  background:rgba(255,107,107,.14);
-  border:1px solid rgba(255,107,107,.42);
+  background:rgba(209,91,91,.12);
+  border:1px solid rgba(209,91,91,.35);
   border-radius:8px;
   padding:6px;
   font-size:11px;
@@ -660,6 +660,26 @@ function fixedAction(fixedDebuff, truthKey, prefix) {
   return `${prefix} + ${debuffs[fixedDebuff].result[key]}`;
 }
 
+function isGcInputReady(prefix) {
+  if (prefix === "gc1") {
+    return (state.gc1Accel.length > 0 || Boolean(state.gc1Element)) &&
+      Boolean(state.gc1Timing) &&
+      state.gc1Truth !== null;
+  }
+
+  if (prefix === "gc2") {
+    return (state.gc2Accel.length > 0 || Boolean(state.gc2Element)) &&
+      Boolean(state.gc2Timing) &&
+      state.gc2Truth !== null;
+  }
+
+  return false;
+}
+
+function areGcInputsReady() {
+  return isGcInputReady("gc1") && isGcInputReady("gc2");
+}
+
 function hasAnyGcActionForTiming(targetTiming) {
   const gc1Ready = state.gc1Timing === targetTiming &&
     (state.gc1Accel.length > 0 || Boolean(state.gc1Element)) &&
@@ -677,13 +697,13 @@ function isStageDone(stageId) {
     case "gc3":
       return Boolean(state.gc3Color) && Boolean(state.gc3Life) && state.gc3Truth !== null;
     case "early-main":
-      return hasAnyGcActionForTiming("early");
+      return areGcInputsReady();
     case "gc1-curse":
       return state.gc1Truth !== null;
     case "fire":
       return state.fireTruth !== null;
     case "late-main":
-      return hasAnyGcActionForTiming("late");
+      return areGcInputsReady();
     case "gc2-curse":
       return state.gc2Truth !== null;
     case "water":
