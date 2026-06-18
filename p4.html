@@ -686,32 +686,32 @@ function processStages() {
     },
     {
       id:"early-main",
-      name:"②集合散会",
+      name:"・集合散会",
       action:gcActionForTiming("early")
     },
     {
       id:"gc1-curse",
-      name:"③呪詛",
+      name:"・呪詛",
       action:curseAction("gc1Optional", "gc1Truth")
     },
     {
       id:"fire",
-      name:"④ほのお",
+      name:"・ほのお",
       action:fixedAction("chaosFire", "fireTruth", "")
     },
     {
       id:"late-main",
-      name:"⑤集合散会",
+      name:"・集合散会",
       action:`ブリザガ確認\n${gcActionForTiming("late")}`
     },
     {
       id:"gc2-curse",
-      name:"⑥呪詛",
+      name:"・呪詛",
       action:curseAction("gc2Optional", "gc2Truth")
     },
     {
       id:"water",
-      name:"⑦つなみ",
+      name:"・つなみ",
       action:fixedAction("chaosWater", "waterTruth", "")
     }
   ];
