@@ -556,7 +556,17 @@ function compute(phase) {
     if (!isComplete(phase)) return { state:"未入力", action:"未入力" };
 
     const truth = state.gc3Truth;
-    const ownColor = state.gc3Color === "deadWound" ? "blue" : "purple";
+
+    // GC3の色は真偽で反転する
+    // 真：死者=青 / 生者=紫
+    // 偽：死者=紫 / 生者=青
+    let ownColor;
+    if (truth) {
+      ownColor = state.gc3Color === "deadWound" ? "blue" : "purple";
+    } else {
+      ownColor = state.gc3Color === "deadWound" ? "purple" : "blue";
+    }
+
     const sameColor = state.gc3Life === "allagan" ? !truth : truth;
     const targetColor = sameColor ? ownColor : opposite(ownColor);
 
