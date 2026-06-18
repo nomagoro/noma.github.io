@@ -1,0 +1,782 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>P4 カンペ</title>
+<style>
+:root {
+  --bg:#0f1117;
+  --panel:#171a23;
+  --panel2:#202431;
+  --text:#f2f4f8;
+  --muted:#9aa3b2;
+  --accent:#7aa2ff;
+  --danger:#d15b5b;
+  --ok:#8bd17c;
+  --border:#343948;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+.app {
+  width:min(720px,100%);
+  margin:0 auto;
+  padding:8px;
+  padding-bottom:226px;
+}
+header {
+  position:sticky;
+  top:0;
+  z-index:20;
+  background:rgba(15,17,23,.96);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid #2d3342;
+  padding:7px 0;
+  margin-bottom:8px;
+}
+.header-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+h1 {
+  margin:0;
+  font-size:18px;
+  font-weight:850;
+}
+.reset {
+  min-height:32px;
+  padding:4px 12px;
+  border:1px solid rgba(209,91,91,.45);
+  border-radius:8px;
+  background:rgba(209,91,91,.12);
+  color:#ffdede;
+  font-size:13px;
+  font-weight:850;
+}
+.block {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-left:5px solid #343948;
+  border-radius:10px;
+  padding:8px;
+  margin-bottom:8px;
+}
+.block.done {
+  border-left-color:var(--accent);
+  background:#1b2230;
+}
+.block-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:7px;
+}
+.block-title {
+  font-size:16px;
+  font-weight:900;
+  color:#dfe5f2;
+}
+.block-state {
+  min-width:0;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.gc-grid {
+  display:grid;
+  grid-template-columns: minmax(60px,.55fr) minmax(0,1fr) minmax(72px,.7fr) minmax(60px,.58fr) minmax(72px,.7fr);
+  column-gap:8px;
+  row-gap:5px;
+  align-items:stretch;
+}
+.fixed-grid {
+  display:grid;
+  grid-template-columns: minmax(0,1fr) minmax(92px,.42fr);
+  gap:5px;
+}
+.gc3-grid {
+  display:grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(92px,.65fr);
+  gap:5px;
+}
+.btn-group {
+  display:grid;
+  gap:4px;
+}
+.curse-column {
+  padding-left:4px;
+  border-left:1px solid rgba(122,162,255,.18);
+}
+.cols-2 { grid-template-columns:repeat(2,1fr); }
+.cols-3 { grid-template-columns:repeat(3,1fr); }
+button {
+  appearance:none;
+  border:1px solid var(--border);
+  background:var(--panel2);
+  color:var(--text);
+  border-radius:8px;
+  min-height:38px;
+  padding:4px 3px;
+  font-size:13px;
+  font-weight:900;
+  line-height:1.05;
+  touch-action:manipulation;
+}
+button.selected {
+  background:#3f63b8;
+  border-color:#9db7ff;
+  color:white;
+}
+button.true.selected {
+  background:#2f5fb8;
+  border-color:#9db7ff;
+}
+button.false.selected {
+  background:#b84848;
+  border-color:#e6a0a0;
+}
+button:disabled {
+  opacity:.28;
+  filter:grayscale(1);
+}
+.icon-btn {
+  display:grid;
+  place-items:center;
+  gap:2px;
+  min-height:48px;
+  padding:4px 2px;
+}
+.btn-icon {
+  width:25px;
+  height:25px;
+  object-fit:contain;
+  display:block;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.5));
+}
+.btn-label {
+  font-size:10px;
+  font-weight:900;
+  line-height:1;
+}
+.truth-icon-btn {
+  min-height:48px;
+}
+.truth-icon {
+  width:26px;
+  height:26px;
+}
+.output {
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:30;
+  background:linear-gradient(to top,rgba(15,17,23,1),rgba(15,17,23,.95));
+  border-top:1px solid #2d3342;
+  padding:7px 8px 8px;
+}
+.output-inner {
+  width:min(720px,100%);
+  margin:0 auto;
+}
+.result-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:900;
+  margin-bottom:5px;
+}
+.result-list {
+  display:grid;
+  gap:4px;
+}
+.result-row {
+  display:grid;
+  grid-template-columns:58px 1fr;
+  gap:6px;
+  align-items:center;
+  min-height:31px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:5px 7px;
+}
+.result-row.done {
+  border-color:rgba(139,209,124,.5);
+}
+.result-name {
+  color:#dfe5f2;
+  font-size:12px;
+  font-weight:950;
+}
+.result-action {
+  color:var(--text);
+  font-size:15px;
+  font-weight:950;
+  line-height:1.1;
+}
+.result-action.pending {
+  color:var(--muted);
+  font-weight:800;
+}
+.warn {
+  display:none;
+  color:#ffdede;
+  background:rgba(209,91,91,.12);
+  border:1px solid rgba(209,91,91,.35);
+  border-radius:8px;
+  padding:6px;
+  font-size:11px;
+  font-weight:800;
+  line-height:1.3;
+  margin:6px 0;
+}
+@media(max-width:420px) {
+  .app { padding:6px; padding-bottom:224px; }
+  .block { padding:7px; margin-bottom:7px; }
+  .gc-grid {
+    grid-template-columns: .62fr 1fr .68fr .56fr .68fr;
+    gap:4px;
+  }
+  .gc3-grid { gap:4px; }
+  button { min-height:34px; font-size:12px; }
+  .icon-btn { min-height:44px; }
+  .btn-icon { width:22px; height:22px; }
+  .truth-icon { width:23px; height:23px; }
+  .btn-label { font-size:9px; }
+  .block-title { font-size:15px; }
+  .result-action { font-size:14px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="header-row">
+    <h1>P4 カンペ　ついたデバフを押してね</h1>
+    <button id="resetBtn" class="reset" type="button">RESET</button>
+  </div>
+</header>
+
+<section class="block" id="block-gc1">
+  <div class="block-head">
+    <div class="block-title">グランドクロス　1回目</div>
+    <div id="state-gc1" class="block-state">未入力</div>
+  </div>
+  <div class="gc-grid">
+    <div class="btn-group" data-group="gc1-accel">
+      <button class="icon-btn" data-phase="gc1" data-value="accel" type="button"><img class="btn-icon" src="icons/加速度爆弾.png" alt=""><span class="btn-label">加速度</span></button>
+    </div>
+    <div class="btn-group cols-2" data-group="gc1-element">
+      <button class="icon-btn" data-phase="gc1" data-value="fork" type="button"><img class="btn-icon" src="icons/フォークライトニング.png" alt=""><span class="btn-label">雷</span></button>
+      <button class="icon-btn" data-phase="gc1" data-value="waterCompression" type="button"><img class="btn-icon" src="icons/水属性圧縮.png" alt=""><span class="btn-label">水圧縮</span></button>
+    </div>
+    <div class="btn-group cols-2" data-group="gc1-timing">
+      <button data-value="early" type="button">早</button>
+      <button data-value="late" type="button">遅</button>
+    </div>
+    <div class="btn-group curse-column" data-group="gc1-optional">
+      <button class="icon-btn" data-phase="gc1" data-value="curseEarly" type="button"><img class="btn-icon" src="icons/呪詛の叫声.png" alt=""><span class="btn-label">呪詛持ち</span></button>
+    </div>
+    <div class="btn-group cols-2" data-group="gc1-truth">
+      <button class="true icon-btn truth-icon-btn" data-value="true" type="button"><img class="btn-icon truth-icon" src="icons/true.png" alt=""><span class="btn-label">真</span></button>
+      <button class="false icon-btn truth-icon-btn" data-value="false" type="button"><img class="btn-icon truth-icon" src="icons/false.png" alt=""><span class="btn-label">偽</span></button>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="block-fire">
+  <div class="block-head">
+    <div class="block-title">ほのお</div>
+    <div id="state-fire" class="block-state">未入力</div>
+  </div>
+  <div class="fixed-grid">
+    <button class="icon-btn" type="button" disabled><img class="btn-icon" src="icons/混沌の炎.png" alt=""><span class="btn-label">炎</span></button>
+    <div class="btn-group cols-2" data-group="fire-truth">
+      <button class="true icon-btn truth-icon-btn" data-value="true" type="button"><img class="btn-icon truth-icon" src="icons/true.png" alt=""><span class="btn-label">真</span></button>
+      <button class="false icon-btn truth-icon-btn" data-value="false" type="button"><img class="btn-icon truth-icon" src="icons/false.png" alt=""><span class="btn-label">偽</span></button>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="block-gc2">
+  <div class="block-head">
+    <div class="block-title">グランドクロス　2回目</div>
+    <div id="state-gc2" class="block-state">未入力</div>
+  </div>
+  <div class="gc-grid">
+    <div class="btn-group" data-group="gc2-accel">
+      <button class="icon-btn" data-phase="gc2" data-value="accel" type="button"><img class="btn-icon" src="icons/加速度爆弾.png" alt=""><span class="btn-label">加速度</span></button>
+    </div>
+    <div class="btn-group cols-2" data-group="gc2-element">
+      <button class="icon-btn" data-phase="gc2" data-value="fork" type="button"><img class="btn-icon" src="icons/フォークライトニング.png" alt=""><span class="btn-label">雷</span></button>
+      <button class="icon-btn" data-phase="gc2" data-value="waterCompression" type="button"><img class="btn-icon" src="icons/水属性圧縮.png" alt=""><span class="btn-label">水圧縮</span></button>
+    </div>
+    <div class="btn-group cols-2" data-group="gc2-timing">
+      <button data-value="early" type="button">早</button>
+      <button data-value="late" type="button">遅</button>
+    </div>
+    <div class="btn-group curse-column" data-group="gc2-optional">
+      <button class="icon-btn" data-phase="gc2" data-value="curseLate" type="button"><img class="btn-icon" src="icons/呪詛の叫声.png" alt=""><span class="btn-label">呪詛</span></button>
+    </div>
+    <div class="btn-group cols-2" data-group="gc2-truth">
+      <button class="true icon-btn truth-icon-btn" data-value="true" type="button"><img class="btn-icon truth-icon" src="icons/true.png" alt=""><span class="btn-label">真</span></button>
+      <button class="false icon-btn truth-icon-btn" data-value="false" type="button"><img class="btn-icon truth-icon" src="icons/false.png" alt=""><span class="btn-label">偽</span></button>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="block-water">
+  <div class="block-head">
+    <div class="block-title">つなみ</div>
+    <div id="state-water" class="block-state">未入力</div>
+  </div>
+  <div class="fixed-grid">
+    <button class="icon-btn" type="button" disabled><img class="btn-icon" src="icons/混沌の水.png" alt=""><span class="btn-label">水</span></button>
+    <div class="btn-group cols-2" data-group="water-truth">
+      <button class="true icon-btn truth-icon-btn" data-value="true" type="button"><img class="btn-icon truth-icon" src="icons/true.png" alt=""><span class="btn-label">真</span></button>
+      <button class="false icon-btn truth-icon-btn" data-value="false" type="button"><img class="btn-icon truth-icon" src="icons/false.png" alt=""><span class="btn-label">偽</span></button>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="block-gc3">
+  <div class="block-head">
+    <div class="block-title">グランドクロス　3回目</div>
+    <div id="state-gc3" class="block-state">未入力</div>
+  </div>
+  <div class="gc3-grid">
+    <div class="btn-group cols-2" data-group="gc3-color">
+      <button class="icon-btn" data-value="deadWound" type="button"><img class="btn-icon" src="icons/死者の傷.png" alt=""><span class="btn-label">死者</span></button>
+      <button class="icon-btn" data-value="aliveWound" type="button"><img class="btn-icon" src="icons/生者の傷.png" alt=""><span class="btn-label">生者</span></button>
+    </div>
+    <div class="btn-group cols-2" data-group="gc3-life">
+      <button class="icon-btn" data-value="allagan" type="button"><img class="btn-icon" src="icons/アラガンフィールド.png" alt=""><span class="btn-label">アラガン</span></button>
+      <button class="icon-btn" data-value="transcendence" type="button"><img class="btn-icon" src="icons/死の超越.png" alt=""><span class="btn-label">超越</span></button>
+    </div>
+    <div class="btn-group cols-2" data-group="gc3-truth">
+      <button class="true icon-btn truth-icon-btn" data-value="true" type="button"><img class="btn-icon truth-icon" src="icons/true.png" alt=""><span class="btn-label">真</span></button>
+      <button class="false icon-btn truth-icon-btn" data-value="false" type="button"><img class="btn-icon truth-icon" src="icons/false.png" alt=""><span class="btn-label">偽</span></button>
+    </div>
+  </div>
+</section>
+
+<div id="warn" class="warn"></div>
+</div>
+
+<div class="output">
+  <div class="output-inner">
+    <div class="result-head"><span>やること</span><span id="count">0/5</span></div>
+    <div id="resultList" class="result-list"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+const debuffs = {
+  curseEarly: { short:"呪詛", result:{ true:"見ない", false:"見る" } },
+  curseLate: { short:"呪詛", result:{ true:"見ない", false:"見る" } },
+  fork: { short:"雷", result:{ true:"1人受け", false:"頭割り" } },
+  waterCompression: { short:"水圧縮", result:{ true:"頭割り", false:"1人受け" } },
+  accel: { short:"加速度", result:{ true:"動かない", false:"動く" } },
+  chaosWater: { short:"水", result:{ true:"ドーナツ", false:"タケノコ" } },
+  chaosFire: { short:"炎", result:{ true:"タケノコ", false:"ドーナツ" } },
+  deadWound: { short:"死者" },
+  aliveWound: { short:"生者" },
+  allagan: { short:"アラガン" },
+  transcendence: { short:"超越" }
+};
+
+const phases = [
+  { id:"gc1", name:"GC1", type:"multi", accelKey:"gc1Accel", elementKey:"gc1Element", timingKey:"gc1Timing", optionalKey:"gc1Optional", truthKey:"gc1Truth" },
+  { id:"fire", name:"炎", type:"fixed", fixedDebuff:"chaosFire", truthKey:"fireTruth" },
+  { id:"gc2", name:"GC2", type:"multi", accelKey:"gc2Accel", elementKey:"gc2Element", timingKey:"gc2Timing", optionalKey:"gc2Optional", truthKey:"gc2Truth" },
+  { id:"water", name:"水", type:"fixed", fixedDebuff:"chaosWater", truthKey:"waterTruth" },
+  { id:"gc3", name:"GC3", type:"gc3", colorKey:"gc3Color", lifeKey:"gc3Life", truthKey:"gc3Truth" }
+];
+
+const state = {
+  gc1Accel:[], gc1Element:null, gc1Timing:null, gc1Optional:[], gc1Truth:null,
+  fireTruth:null,
+  gc2Accel:[], gc2Element:null, gc2Timing:null, gc2Optional:[], gc2Truth:null,
+  waterTruth:null,
+  gc3Color:null, gc3Life:null, gc3Truth:null
+};
+
+const groupMap = {
+  "gc1-accel": { key:"gc1Accel", mode:"multi" },
+  "gc1-element": { key:"gc1Element", mode:"single" },
+  "gc1-timing": { key:"gc1Timing", mode:"single" },
+  "gc1-optional": { key:"gc1Optional", mode:"multi" },
+  "gc1-truth": { key:"gc1Truth", mode:"truth" },
+  "fire-truth": { key:"fireTruth", mode:"truth" },
+  "gc2-accel": { key:"gc2Accel", mode:"multi" },
+  "gc2-element": { key:"gc2Element", mode:"single" },
+  "gc2-timing": { key:"gc2Timing", mode:"single" },
+  "gc2-optional": { key:"gc2Optional", mode:"multi" },
+  "gc2-truth": { key:"gc2Truth", mode:"truth" },
+  "water-truth": { key:"waterTruth", mode:"truth" },
+  "gc3-color": { key:"gc3Color", mode:"single" },
+  "gc3-life": { key:"gc3Life", mode:"single" },
+  "gc3-truth": { key:"gc3Truth", mode:"truth" }
+};
+
+const $ = (id) => document.getElementById(id);
+const truthText = (v) => v ? "真" : "偽";
+const timingText = (v) => v === "early" ? "早" : v === "late" ? "遅" : "-";
+const opposite = (c) => c === "blue" ? "purple" : "blue";
+const beamText = (c) => c === "blue" ? "青ビームあたる" : "紫ビームあたる";
+
+document.querySelectorAll("[data-group]").forEach(group => {
+  const config = groupMap[group.dataset.group];
+  group.querySelectorAll("button").forEach(button => {
+    button.addEventListener("click", () => {
+      if (button.disabled) return;
+      const value = button.dataset.value;
+
+      if (config.mode === "single") {
+        state[config.key] = value;
+      } else if (config.mode === "multi") {
+        state[config.key] = state[config.key].includes(value) ? [] : [value];
+      } else {
+        state[config.key] = value === "true";
+      }
+
+      render();
+    });
+  });
+});
+
+function isLocked(phase, value) {
+  if (phase === "gc1") {
+    if (value === "accel" && state.gc2Accel.includes("accel")) return true;
+    if (value === "fork" && state.gc2Element === "fork") return true;
+    if (value === "waterCompression" && state.gc2Element === "waterCompression") return true;
+    if (value === "curseEarly" && state.gc2Optional.includes("curseLate")) return true;
+  }
+
+  if (phase === "gc2") {
+    if (value === "accel" && state.gc1Accel.includes("accel")) return true;
+    if (value === "fork" && state.gc1Element === "fork") return true;
+    if (value === "waterCompression" && state.gc1Element === "waterCompression") return true;
+    if (value === "curseLate" && state.gc1Optional.includes("curseEarly")) return true;
+  }
+
+  return false;
+}
+
+function syncButtons() {
+  document.querySelectorAll("[data-group]").forEach(group => {
+    const config = groupMap[group.dataset.group];
+
+    group.querySelectorAll("button").forEach(button => {
+      const value = button.dataset.value;
+      let selected = false;
+
+      if (config.mode === "multi") selected = state[config.key].includes(value);
+      else if (config.mode === "truth") selected = state[config.key] === (value === "true");
+      else selected = state[config.key] === value;
+
+      button.classList.toggle("selected", selected);
+      button.disabled = button.dataset.phase ? isLocked(button.dataset.phase, value) : false;
+    });
+  });
+}
+
+function isComplete(phase) {
+  if (phase.type === "multi") return (state[phase.accelKey].length > 0 || Boolean(state[phase.elementKey])) && Boolean(state[phase.timingKey]) && state[phase.truthKey] !== null;
+  if (phase.type === "fixed") return state[phase.truthKey] !== null;
+  if (phase.type === "gc3") return Boolean(state[phase.colorKey]) && Boolean(state[phase.lifeKey]) && state[phase.truthKey] !== null;
+  return false;
+}
+
+function missingItems() {
+  const items = [];
+  if (state.gc1Accel.length === 0 && !state.gc1Element) items.push("GC1");
+  if (!state.gc1Timing) items.push("GC1早遅");
+  if (state.gc1Truth === null) items.push("GC1真偽");
+  if (state.fireTruth === null) items.push("炎");
+  if (state.gc2Accel.length === 0 && !state.gc2Element) items.push("GC2");
+  if (!state.gc2Timing) items.push("GC2早遅");
+  if (state.gc2Truth === null) items.push("GC2真偽");
+  if (state.waterTruth === null) items.push("水");
+  if (!state.gc3Color || !state.gc3Life || state.gc3Truth === null) items.push("GC3");
+  return items;
+}
+
+function compute(phase) {
+  if (phase.type === "multi") {
+    if (!isComplete(phase)) return { state:"未入力", action:"未入力" };
+
+    const truth = state[phase.truthKey];
+    const timing = timingText(state[phase.timingKey]);
+    const hasCurse = state[phase.optionalKey].length > 0;
+    const parts = [];
+
+    if (state[phase.accelKey].includes("accel")) parts.push("加速度");
+    if (state[phase.elementKey]) parts.push(debuffs[state[phase.elementKey]].short);
+
+    return {
+      state:`${parts.join("+")}(${timing}) ${hasCurse ? "+呪詛" : "呪詛なし"} ${truthText(truth)}`,
+      action:""
+    };
+  }
+
+  if (phase.type === "fixed") {
+    if (!isComplete(phase)) return { state:"未入力", action:"未入力" };
+    return {
+      state:truthText(state[phase.truthKey]),
+      action:""
+    };
+  }
+
+  if (phase.type === "gc3") {
+    if (!isComplete(phase)) return { state:"未入力", action:"未入力" };
+
+    const truth = state.gc3Truth;
+    const ownColor = state.gc3Color === "deadWound" ? "blue" : "purple";
+    const sameColor = state.gc3Life === "allagan" ? !truth : truth;
+    const targetColor = sameColor ? ownColor : opposite(ownColor);
+
+    return {
+      state:`${debuffs[state.gc3Color].short}+${debuffs[state.gc3Life].short} ${truthText(truth)}`,
+      action:beamText(targetColor)
+    };
+  }
+}
+
+function gcMainAction(accelKey, elementKey, timingKey, truthKey) {
+  if ((state[accelKey].length === 0 && !state[elementKey]) || !state[timingKey] || state[truthKey] === null) return "未入力";
+
+  const truth = state[truthKey];
+  const key = truth ? "true" : "false";
+  const timing = timingText(state[timingKey]);
+  const actions = [];
+
+  if (state[accelKey].includes("accel")) {
+    actions.push(`${timing} 加速度：${debuffs.accel.result[key]}`);
+  }
+
+  if (state[elementKey]) {
+    const d = debuffs[state[elementKey]];
+    actions.push(`${timing} ${d.short}：${d.result[key]}`);
+  }
+
+  return actions.join(" / ");
+}
+
+function gcActionForTiming(targetTiming) {
+  const actions = [];
+
+  collectGcActionForTiming(actions, {
+    accelKey:"gc1Accel",
+    elementKey:"gc1Element",
+    timingKey:"gc1Timing",
+    truthKey:"gc1Truth"
+  }, targetTiming);
+
+  collectGcActionForTiming(actions, {
+    accelKey:"gc2Accel",
+    elementKey:"gc2Element",
+    timingKey:"gc2Timing",
+    truthKey:"gc2Truth"
+  }, targetTiming);
+
+  return actions.length ? actions.join(" / ") : "頭割り参加";
+}
+
+function collectGcActionForTiming(actions, keys, targetTiming) {
+  if (state[keys.timingKey] !== targetTiming) return;
+  if ((state[keys.accelKey].length === 0 && !state[keys.elementKey]) || state[keys.truthKey] === null) return;
+
+  const truth = state[keys.truthKey];
+  const key = truth ? "true" : "false";
+  const timing = timingText(targetTiming);
+
+  if (state[keys.accelKey].includes("accel")) {
+    actions.push(`${timing} 加速度：${debuffs.accel.result[key]}`);
+  }
+
+  if (state[keys.elementKey]) {
+    const d = debuffs[state[keys.elementKey]];
+    actions.push(`${timing} ${d.short}：${d.result[key]}`);
+  }
+}
+
+function curseAction(optionalKey, truthKey) {
+  if (state[truthKey] === null) return "未入力";
+  const truth = state[truthKey];
+  const hasCurse = state[optionalKey].length > 0;
+
+  if (hasCurse) {
+    return truth ? "中央へ + 見ない" : "中央へ + 見る";
+  }
+
+  return truth ? "呪詛持ち見ない" : "呪詛持ち見る";
+}
+
+function fixedAction(fixedDebuff, truthKey, prefix) {
+  if (state[truthKey] === null) return "未入力";
+  const truth = state[truthKey];
+  const key = truth ? "true" : "false";
+
+  if (!prefix) {
+    return debuffs[fixedDebuff].result[key];
+  }
+
+  return `${prefix} + ${debuffs[fixedDebuff].result[key]}`;
+}
+
+function hasAnyGcActionForTiming(targetTiming) {
+  const gc1Ready = state.gc1Timing === targetTiming &&
+    (state.gc1Accel.length > 0 || Boolean(state.gc1Element)) &&
+    state.gc1Truth !== null;
+
+  const gc2Ready = state.gc2Timing === targetTiming &&
+    (state.gc2Accel.length > 0 || Boolean(state.gc2Element)) &&
+    state.gc2Truth !== null;
+
+  return gc1Ready || gc2Ready;
+}
+
+function isStageDone(stageId) {
+  switch(stageId) {
+    case "gc3":
+      return Boolean(state.gc3Color) && Boolean(state.gc3Life) && state.gc3Truth !== null;
+    case "early-main":
+      return hasAnyGcActionForTiming("early");
+    case "gc1-curse":
+      return state.gc1Truth !== null;
+    case "fire":
+      return state.fireTruth !== null;
+    case "late-main":
+      return hasAnyGcActionForTiming("late");
+    case "gc2-curse":
+      return state.gc2Truth !== null;
+    case "water":
+      return state.waterTruth !== null;
+    default:
+      return false;
+  }
+}
+
+function processStages() {
+  const gc3Action = compute(phases.find(p => p.id === "gc3")).action;
+
+  return [
+    {
+      id:"gc3",
+      name:"①GC3",
+      action:gc3Action
+    },
+    {
+      id:"early-main",
+      name:"②集合散会",
+      action:gcActionForTiming("early")
+    },
+    {
+      id:"gc1-curse",
+      name:"③呪詛",
+      action:curseAction("gc1Optional", "gc1Truth")
+    },
+    {
+      id:"fire",
+      name:"④どきどき",
+      action:fixedAction("chaosFire", "fireTruth", "")
+    },
+    {
+      id:"late-main",
+      name:"⑤集合散会",
+      action:`ブリザガ確認\n${gcActionForTiming("late")}`
+    },
+    {
+      id:"gc2-curse",
+      name:"⑥呪詛",
+      action:curseAction("gc2Optional", "gc2Truth")
+    },
+    {
+      id:"water",
+      name:"⑦マジック",
+      action:fixedAction("chaosWater", "waterTruth", "")
+    }
+  ];
+}
+
+function render() {
+  syncButtons();
+
+  const inputResults = phases.map(compute);
+
+  phases.forEach((phase, index) => {
+    const done = isComplete(phase);
+    $(`block-${phase.id}`).classList.toggle("done", done);
+    $(`state-${phase.id}`).textContent = inputResults[index].state;
+  });
+
+  const missing = missingItems();
+  const extraWarnings = [];
+  if (state.gc1Accel.length === 0 && state.gc2Accel.length === 0) {
+    extraWarnings.push("加速度はGC1かGC2のどちらかに必ず付く");
+  }
+  const warnTexts = [];
+  if (missing.length) warnTexts.push(`未入力：${missing.join(" / ")}`);
+  if (extraWarnings.length) warnTexts.push(extraWarnings.join(" / "));
+  $("warn").style.display = warnTexts.length ? "block" : "none";
+  $("warn").textContent = warnTexts.join(" / ");
+
+  const stages = processStages();
+  const doneCount = stages.filter(stage => isStageDone(stage.id)).length;
+
+  $("count").textContent = `${doneCount}/7`;
+  $("resultList").innerHTML = stages.map(stage => {
+    const done = isStageDone(stage.id);
+    return `
+      <div class="result-row ${done ? "done" : ""}">
+        <div class="result-name">${stage.name}</div>
+        <div class="result-action ${done ? "" : "pending"}">${stage.action}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function resetAll() {
+  state.gc1Accel = [];
+  state.gc1Element = null;
+  state.gc1Timing = null;
+  state.gc1Optional = [];
+  state.gc1Truth = null;
+  state.fireTruth = null;
+  state.gc2Accel = [];
+  state.gc2Element = null;
+  state.gc2Timing = null;
+  state.gc2Optional = [];
+  state.gc2Truth = null;
+  state.waterTruth = null;
+  state.gc3Color = null;
+  state.gc3Life = null;
+  state.gc3Truth = null;
+  render();
+}
+
+$("resetBtn").addEventListener("click", () => {
+  if (confirm("リセットする？")) resetAll();
+});
+
+render();
+</script>
+</body>
+</html>
