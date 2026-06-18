@@ -584,35 +584,48 @@ function gcMainAction(accelKey, elementKey, timingKey, truthKey) {
 
 function gcActionForTiming(targetTiming) {
   const actions = [];
+  const meta = {
+    hasAccel: false,
+    hasElement: false
+  };
 
-  collectGcActionForTiming(actions, {
+  collectGcActionForTiming(actions, meta, {
     accelKey:"gc1Accel",
     elementKey:"gc1Element",
     timingKey:"gc1Timing",
     truthKey:"gc1Truth"
   }, targetTiming);
 
-  collectGcActionForTiming(actions, {
+  collectGcActionForTiming(actions, meta, {
     accelKey:"gc2Accel",
     elementKey:"gc2Element",
     timingKey:"gc2Timing",
     truthKey:"gc2Truth"
   }, targetTiming);
 
-  return actions.length ? actions.join(" / ") : "頭割り参加";
+  if (!actions.length) return "頭割り参加";
+
+  if (meta.hasAccel && !meta.hasElement) {
+    actions.push("頭割り参加");
+  }
+
+  return actions.join(" / ");
 }
 
-function collectGcActionForTiming(actions, keys, targetTiming) {
+function collectGcActionForTiming(actions, meta, keys, targetTiming) {
   if (state[keys.timingKey] !== targetTiming) return;
   if ((state[keys.accelKey].length === 0 && !state[keys.elementKey]) || state[keys.truthKey] === null) return;
 
   const truth = state[keys.truthKey];
   const key = truth ? "true" : "false";
+
   if (state[keys.accelKey].includes("accel")) {
+    meta.hasAccel = true;
     actions.push(`加速度：${debuffs.accel.result[key]}`);
   }
 
   if (state[keys.elementKey]) {
+    meta.hasElement = true;
     const d = debuffs[state[keys.elementKey]];
     actions.push(`${d.short}：${d.result[key]}`);
   }
@@ -681,7 +694,7 @@ function processStages() {
   return [
     {
       id:"gc3",
-      name:"①GC3",
+      name:"・GC3",
       action:gc3Action
     },
     {
