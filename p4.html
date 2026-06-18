@@ -507,11 +507,11 @@ function missingItems() {
   if (state.gc1Accel.length === 0 && !state.gc1Element) items.push("GC1");
   if (!state.gc1Timing) items.push("GC1早遅");
   if (state.gc1Truth === null) items.push("GC1真偽");
-  if (state.fireTruth === null) items.push("炎");
+  if (state.fireTruth === null) items.push("炎真偽");
   if (state.gc2Accel.length === 0 && !state.gc2Element) items.push("GC2");
   if (!state.gc2Timing) items.push("GC2早遅");
   if (state.gc2Truth === null) items.push("GC2真偽");
-  if (state.waterTruth === null) items.push("水");
+  if (state.waterTruth === null) items.push("水真偽");
   if (!state.gc3Color || !state.gc3Life || state.gc3Truth === null) items.push("GC3");
   return items;
 }
