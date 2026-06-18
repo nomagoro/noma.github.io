@@ -6,15 +6,15 @@
 <title>P4 カンペ</title>
 <style>
 :root {
-  --bg:#0f1117;
-  --panel:#171a23;
-  --panel2:#202431;
-  --text:#f2f4f8;
-  --muted:#9aa3b2;
-  --accent:#7aa2ff;
-  --danger:#d15b5b;
-  --ok:#8bd17c;
-  --border:#343948;
+  --bg:#0b1020;
+  --panel:#151b2d;
+  --panel2:#222c46;
+  --text:#f6f8ff;
+  --muted:#b3bdcf;
+  --accent:#7fc7ff;
+  --danger:#ff6b6b;
+  --ok:#74e39a;
+  --border:#44506a;
 }
 * { box-sizing:border-box; }
 body {
@@ -33,9 +33,9 @@ header {
   position:sticky;
   top:0;
   z-index:20;
-  background:rgba(15,17,23,.96);
+  background:rgba(11,16,32,.96);
   backdrop-filter:blur(10px);
-  border-bottom:1px solid #2d3342;
+  border-bottom:1px solid #3a4660;
   padding:7px 0;
   margin-bottom:8px;
 }
@@ -55,7 +55,7 @@ h1 {
   padding:4px 12px;
   border:1px solid rgba(209,91,91,.45);
   border-radius:8px;
-  background:rgba(209,91,91,.12);
+  background:rgba(255,107,107,.14);
   color:#ffdede;
   font-size:13px;
   font-weight:850;
@@ -63,14 +63,14 @@ h1 {
 .block {
   background:var(--panel);
   border:1px solid var(--border);
-  border-left:5px solid #343948;
+  border-left:5px solid #44506a;
   border-radius:10px;
   padding:8px;
   margin-bottom:8px;
 }
 .block.done {
   border-left-color:var(--accent);
-  background:#1b2230;
+  background:#192744;
 }
 .block-head {
   display:flex;
@@ -82,7 +82,7 @@ h1 {
 .block-title {
   font-size:16px;
   font-weight:900;
-  color:#dfe5f2;
+  color:#eef4ff;
 }
 .block-state {
   min-width:0;
@@ -129,22 +129,22 @@ button {
   min-height:38px;
   padding:4px 3px;
   font-size:13px;
-  font-weight:900;
+  font-weight:950;
   line-height:1.05;
   touch-action:manipulation;
 }
 button.selected {
-  background:#3f63b8;
-  border-color:#9db7ff;
+  background:#2f7fe8;
+  border-color:#b7d8ff;
   color:white;
 }
 button.true.selected {
-  background:#2f5fb8;
-  border-color:#9db7ff;
+  background:#246ee6;
+  border-color:#b7d8ff;
 }
 button.false.selected {
-  background:#b84848;
-  border-color:#e6a0a0;
+  background:#d84f5a;
+  border-color:#ffb8b8;
 }
 button:disabled {
   opacity:.28;
@@ -182,8 +182,8 @@ button:disabled {
   right:0;
   bottom:0;
   z-index:30;
-  background:linear-gradient(to top,rgba(15,17,23,1),rgba(15,17,23,.95));
-  border-top:1px solid #2d3342;
+  background:linear-gradient(to top,rgba(11,16,32,1),rgba(11,16,32,.96));
+  border-top:1px solid #3a4660;
   padding:7px 8px 8px;
 }
 .output-inner {
@@ -205,20 +205,20 @@ button:disabled {
 }
 .result-row {
   display:grid;
-  grid-template-columns:56px 1fr;
+  grid-template-columns:58px 1fr;
   gap:6px;
   align-items:center;
   min-height:25px;
   background:var(--panel);
   border:1px solid var(--border);
   border-radius:8px;
-  padding:3px 6px;
+  padding:4px 7px;
 }
 .result-row.done {
-  border-color:rgba(139,209,124,.5);
+  border-color:rgba(116,227,154,.75);
 }
 .result-name {
-  color:#dfe5f2;
+  color:#eef4ff;
   font-size:11px;
   font-weight:950;
 }
@@ -226,7 +226,12 @@ button:disabled {
   color:var(--text);
   font-size:13px;
   font-weight:950;
-  line-height:1.05;
+  line-height:1.08;
+  white-space:pre-line;
+}
+.check-action {
+  color:#ffd166;
+  font-weight:1000;
 }
 .result-action.pending {
   color:var(--muted);
@@ -235,8 +240,8 @@ button:disabled {
 .warn {
   display:none;
   color:#ffdede;
-  background:rgba(209,91,91,.12);
-  border:1px solid rgba(209,91,91,.35);
+  background:rgba(255,107,107,.14);
+  border:1px solid rgba(255,107,107,.42);
   border-radius:8px;
   padding:6px;
   font-size:11px;
@@ -710,12 +715,12 @@ function processStages() {
     {
       id:"fire",
       name:"ほのお",
-      action:`サンダガ確認　\n${fixedAction("chaosFire", "fireTruth", "")}`
+      action:`<span class="check-action">サンダガ確認</span>\n${fixedAction("chaosFire", "fireTruth", "")}`
     },
     {
       id:"late-main",
       name:"集合散会",
-      action:`ブリザガ確認　\n${gcActionForTiming("late")}`
+      action:`<span class="check-action">ブリザガ確認</span>\n${gcActionForTiming("late")}`
     },
     {
       id:"gc2-curse",
