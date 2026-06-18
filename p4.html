@@ -107,7 +107,7 @@ h1 {
 }
 .gc3-grid {
   display:grid;
-  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(92px,.65fr);
   gap:5px;
 }
 .btn-group {
@@ -369,6 +369,10 @@ button:disabled {
       <button class="icon-btn" data-value="allagan" type="button"><img class="btn-icon" src="icons/アラガンフィールド.png" alt=""><span class="btn-label">アラガン</span></button>
       <button class="icon-btn" data-value="transcendence" type="button"><img class="btn-icon" src="icons/死の超越.png" alt=""><span class="btn-label">超越</span></button>
     </div>
+    <div class="btn-group cols-2" data-group="gc3-truth">
+      <button class="true icon-btn truth-icon-btn" data-value="true" type="button"><img class="btn-icon truth-icon" src="icons/true.png" alt=""><span class="btn-label">真</span></button>
+      <button class="false icon-btn truth-icon-btn" data-value="false" type="button"><img class="btn-icon truth-icon" src="icons/false.png" alt=""><span class="btn-label">偽</span></button>
+    </div>
   </div>
 </section>
 
@@ -404,7 +408,7 @@ const phases = [
   { id:"fire", name:"炎", type:"fixed", fixedDebuff:"chaosFire", truthKey:"fireTruth" },
   { id:"gc2", name:"GC2", type:"multi", accelKey:"gc2Accel", elementKey:"gc2Element", timingKey:"gc2Timing", truthKey:"gc2Truth" },
   { id:"water", name:"水", type:"fixed", fixedDebuff:"chaosWater", truthKey:"waterTruth" },
-  { id:"gc3", name:"GC3", type:"gc3", colorKey:"gc3Color", lifeKey:"gc3Life" }
+  { id:"gc3", name:"GC3", type:"gc3", colorKey:"gc3Color", lifeKey:"gc3Life", truthKey:"gc3Truth" }
 ];
 
 const state = {
@@ -412,7 +416,7 @@ const state = {
   fireTruth:null,
   gc2Accel:[], gc2Element:null, gc2Timing:null, gc2Truth:null,
   waterTruth:null,
-  gc3Color:null, gc3Life:null
+  gc3Color:null, gc3Life:null, gc3Truth:null
 };
 
 const groupMap = {
@@ -427,7 +431,8 @@ const groupMap = {
   "gc2-truth": { key:"gc2Truth", mode:"truth" },
   "water-truth": { key:"waterTruth", mode:"truth" },
   "gc3-color": { key:"gc3Color", mode:"single" },
-  "gc3-life": { key:"gc3Life", mode:"single" }
+  "gc3-life": { key:"gc3Life", mode:"single" },
+  "gc3-truth": { key:"gc3Truth", mode:"truth" }
 };
 
 const $ = (id) => document.getElementById(id);
@@ -493,7 +498,7 @@ function syncButtons() {
 function isComplete(phase) {
   if (phase.type === "multi") return (state[phase.accelKey].length > 0 || Boolean(state[phase.elementKey])) && Boolean(state[phase.timingKey]) && state[phase.truthKey] !== null;
   if (phase.type === "fixed") return state[phase.truthKey] !== null;
-  if (phase.type === "gc3") return Boolean(state[phase.colorKey]) && Boolean(state[phase.lifeKey]);
+  if (phase.type === "gc3") return Boolean(state[phase.colorKey]) && Boolean(state[phase.lifeKey]) && state[phase.truthKey] !== null;
   return false;
 }
 
@@ -502,12 +507,12 @@ function missingItems() {
   if (state.gc1Accel.length === 0 && !state.gc1Element) items.push("GC1");
   if (!state.gc1Timing) items.push("GC1早遅");
   if (state.gc1Truth === null) items.push("GC1真偽");
-  if (state.fireTruth === null) items.push("ほのお真偽");
+  if (state.fireTruth === null) items.push("炎");
   if (state.gc2Accel.length === 0 && !state.gc2Element) items.push("GC2");
   if (!state.gc2Timing) items.push("GC2早遅");
   if (state.gc2Truth === null) items.push("GC2真偽");
-  if (state.waterTruth === null) items.push("つなみ真偽");
-  if (!state.gc3Color || !state.gc3Life) items.push("GC3");
+  if (state.waterTruth === null) items.push("水");
+  if (!state.gc3Color || !state.gc3Life || state.gc3Truth === null) items.push("GC3");
   return items;
 }
 
@@ -539,20 +544,20 @@ function compute(phase) {
   if (phase.type === "gc3") {
     if (!isComplete(phase)) return { state:"未入力", action:"未入力" };
 
-    let targetColor;
+    const truth = state.gc3Truth;
 
-    if (state.gc3Color === "deadWound" && state.gc3Life === "allagan") {
-      targetColor = "purple";
-    } else if (state.gc3Color === "deadWound" && state.gc3Life === "transcendence") {
-      targetColor = "blue";
-    } else if (state.gc3Color === "aliveWound" && state.gc3Life === "allagan") {
-      targetColor = "blue";
+    let ownColor;
+    if (truth) {
+      ownColor = state.gc3Color === "deadWound" ? "blue" : "purple";
     } else {
-      targetColor = "purple";
+      ownColor = state.gc3Color === "deadWound" ? "purple" : "blue";
     }
 
+    const sameColor = state.gc3Life === "allagan" ? !truth : truth;
+    const targetColor = sameColor ? ownColor : opposite(ownColor);
+
     return {
-      state:`${debuffs[state.gc3Color].short}+${debuffs[state.gc3Life].short}`,
+      state:`${debuffs[state.gc3Color].short}+${debuffs[state.gc3Life].short} ${truthText(truth)}`,
       action:beamText(targetColor)
     };
   }
@@ -687,7 +692,7 @@ function hasAnyGcActionForTiming(targetTiming) {
 function isStageDone(stageId) {
   switch(stageId) {
     case "gc3":
-      return Boolean(state.gc3Color) && Boolean(state.gc3Life);
+      return Boolean(state.gc3Color) && Boolean(state.gc3Life) && state.gc3Truth !== null;
     case "early-main":
       return areGcInputsReady();
     case "gc1-curse":
@@ -809,6 +814,7 @@ function resetAll() {
   state.waterTruth = null;
   state.gc3Color = null;
   state.gc3Life = null;
+  state.gc3Truth = null;
   render();
 }
 
