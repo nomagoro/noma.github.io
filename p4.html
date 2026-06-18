@@ -546,14 +546,19 @@ function compute(phase) {
 
     const truth = state.gc3Truth;
 
-    let ownColor;
-    if (truth) {
-      ownColor = state.gc3Color === "deadWound" ? "blue" : "purple";
-    } else {
-      ownColor = state.gc3Color === "deadWound" ? "purple" : "blue";
-    }
+    // 真偽でデバフ色が反転
+    // 真：死者=青 / 生者=紫
+    // 偽：死者=紫 / 生者=青
+    const ownColor = truth
+      ? (state.gc3Color === "deadWound" ? "blue" : "purple")
+      : (state.gc3Color === "deadWound" ? "purple" : "blue");
 
-    const sameColor = state.gc3Life === "allagan" ? !truth : truth;
+    // 真：超越=同色 / アラガン=逆色
+    // 偽：超越=逆色 / アラガン=同色
+    const sameColor = truth
+      ? state.gc3Life === "transcendence"
+      : state.gc3Life === "allagan";
+
     const targetColor = sameColor ? ownColor : opposite(ownColor);
 
     return {
