@@ -292,7 +292,7 @@ button:disabled {
       <button data-value="late" type="button">遅</button>
     </div>
     <div class="btn-group curse-column" data-group="gc1-optional">
-      <button class="icon-btn" data-phase="gc1" data-value="curseEarly" type="button"><img class="btn-icon" src="icons/呪詛の叫声.png" alt=""><span class="btn-label">呪詛持ち</span></button>
+      <button class="icon-btn" data-phase="gc1" data-value="curseEarly" type="button"><img class="btn-icon" src="icons/呪詛の叫声.png" alt=""><span class="btn-label">呪詛</span></button>
     </div>
     <div class="btn-group cols-2" data-group="gc1-truth">
       <button class="true icon-btn truth-icon-btn" data-value="true" type="button"><img class="btn-icon truth-icon" src="icons/true.png" alt=""><span class="btn-label">真</span></button>
@@ -608,15 +608,13 @@ function collectGcActionForTiming(actions, keys, targetTiming) {
 
   const truth = state[keys.truthKey];
   const key = truth ? "true" : "false";
-  const timing = timingText(targetTiming);
-
   if (state[keys.accelKey].includes("accel")) {
-    actions.push(`${timing} 加速度：${debuffs.accel.result[key]}`);
+    actions.push(`加速度：${debuffs.accel.result[key]}`);
   }
 
   if (state[keys.elementKey]) {
     const d = debuffs[state[keys.elementKey]];
-    actions.push(`${timing} ${d.short}：${d.result[key]}`);
+    actions.push(`${d.short}：${d.result[key]}`);
   }
 }
 
