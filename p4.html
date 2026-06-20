@@ -309,7 +309,10 @@ button:disabled {
     <div id="state-fire" class="block-state">未入力</div>
   </div>
   <div class="fixed-grid">
-    <button class="icon-btn" type="button" disabled><img class="btn-icon" src="icons/混沌の炎.png" alt=""><span class="btn-label">炎</span></button>
+    <div class="btn-group cols-2" data-group="fire-debuff">
+      <button class="icon-btn" data-phase="fire" data-value="chaosFire" type="button"><img class="btn-icon" src="icons/混沌の炎.png" alt=""><span class="btn-label">炎</span></button>
+      <button class="icon-btn" data-phase="fire" data-value="chaosWater" type="button"><img class="btn-icon" src="icons/混沌の水.png" alt=""><span class="btn-label">水</span></button>
+    </div>
     <div class="btn-group cols-2" data-group="fire-truth">
       <button class="true icon-btn truth-icon-btn" data-value="true" type="button"><img class="btn-icon truth-icon" src="icons/true.png" alt=""><span class="btn-label">真</span></button>
       <button class="false icon-btn truth-icon-btn" data-value="false" type="button"><img class="btn-icon truth-icon" src="icons/false.png" alt=""><span class="btn-label">偽</span></button>
@@ -347,7 +350,10 @@ button:disabled {
     <div id="state-water" class="block-state">未入力</div>
   </div>
   <div class="fixed-grid">
-    <button class="icon-btn" type="button" disabled><img class="btn-icon" src="icons/混沌の水.png" alt=""><span class="btn-label">水</span></button>
+    <div class="btn-group cols-2" data-group="water-debuff">
+      <button class="icon-btn" data-phase="water" data-value="chaosFire" type="button"><img class="btn-icon" src="icons/混沌の炎.png" alt=""><span class="btn-label">炎</span></button>
+      <button class="icon-btn" data-phase="water" data-value="chaosWater" type="button"><img class="btn-icon" src="icons/混沌の水.png" alt=""><span class="btn-label">水</span></button>
+    </div>
     <div class="btn-group cols-2" data-group="water-truth">
       <button class="true icon-btn truth-icon-btn" data-value="true" type="button"><img class="btn-icon truth-icon" src="icons/true.png" alt=""><span class="btn-label">真</span></button>
       <button class="false icon-btn truth-icon-btn" data-value="false" type="button"><img class="btn-icon truth-icon" src="icons/false.png" alt=""><span class="btn-label">偽</span></button>
@@ -405,17 +411,17 @@ const debuffs = {
 
 const phases = [
   { id:"gc1", name:"GC1", type:"multi", accelKey:"gc1Accel", elementKey:"gc1Element", timingKey:"gc1Timing", truthKey:"gc1Truth" },
-  { id:"fire", name:"炎", type:"fixed", fixedDebuff:"chaosFire", truthKey:"fireTruth" },
+  { id:"fire", name:"炎", type:"fixed", debuffKey:"fireDebuff", truthKey:"fireTruth" },
   { id:"gc2", name:"GC2", type:"multi", accelKey:"gc2Accel", elementKey:"gc2Element", timingKey:"gc2Timing", truthKey:"gc2Truth" },
-  { id:"water", name:"水", type:"fixed", fixedDebuff:"chaosWater", truthKey:"waterTruth" },
+  { id:"water", name:"水", type:"fixed", debuffKey:"waterDebuff", truthKey:"waterTruth" },
   { id:"gc3", name:"GC3", type:"gc3", colorKey:"gc3Color", lifeKey:"gc3Life", truthKey:"gc3Truth" }
 ];
 
 const state = {
   gc1Accel:[], gc1Element:null, gc1Timing:null, gc1Truth:null,
-  fireTruth:null,
+  fireDebuff:null, fireTruth:null,
   gc2Accel:[], gc2Element:null, gc2Timing:null, gc2Truth:null,
-  waterTruth:null,
+  waterDebuff:null, waterTruth:null,
   gc3Color:null, gc3Life:null, gc3Truth:null
 };
 
@@ -424,11 +430,13 @@ const groupMap = {
   "gc1-element": { key:"gc1Element", mode:"single" },
   "gc1-timing": { key:"gc1Timing", mode:"single" },
   "gc1-truth": { key:"gc1Truth", mode:"truth" },
+  "fire-debuff": { key:"fireDebuff", mode:"single" },
   "fire-truth": { key:"fireTruth", mode:"truth" },
   "gc2-accel": { key:"gc2Accel", mode:"multi" },
   "gc2-element": { key:"gc2Element", mode:"single" },
   "gc2-timing": { key:"gc2Timing", mode:"single" },
   "gc2-truth": { key:"gc2Truth", mode:"truth" },
+  "water-debuff": { key:"waterDebuff", mode:"single" },
   "water-truth": { key:"waterTruth", mode:"truth" },
   "gc3-color": { key:"gc3Color", mode:"single" },
   "gc3-life": { key:"gc3Life", mode:"single" },
@@ -456,25 +464,71 @@ document.querySelectorAll("[data-group]").forEach(group => {
         state[config.key] = value === "true";
       }
 
+      normalizeState();
       render();
     });
   });
 });
 
 function isLocked(phase, value) {
+  // GC1/GC2のどちらか片方が加速度、
+  // もう片方が雷or水圧縮。
+  // 同じ回に加速度＋雷/水圧縮は付かない。
+
   if (phase === "gc1") {
-    if (value === "accel" && state.gc2Accel.includes("accel")) return true;
-    if (value === "fork" && state.gc2Element === "fork") return true;
-    if (value === "waterCompression" && state.gc2Element === "waterCompression") return true;
+    if (value === "accel") {
+      return state.gc2Accel.includes("accel") || Boolean(state.gc1Element);
+    }
+
+    if (value === "fork" || value === "waterCompression") {
+      return state.gc1Accel.includes("accel") || Boolean(state.gc2Element);
+    }
   }
 
   if (phase === "gc2") {
-    if (value === "accel" && state.gc1Accel.includes("accel")) return true;
-    if (value === "fork" && state.gc1Element === "fork") return true;
-    if (value === "waterCompression" && state.gc1Element === "waterCompression") return true;
+    if (value === "accel") {
+      return state.gc1Accel.includes("accel") || Boolean(state.gc2Element);
+    }
+
+    if (value === "fork" || value === "waterCompression") {
+      return state.gc2Accel.includes("accel") || Boolean(state.gc1Element);
+    }
+  }
+
+  if (phase === "fire") {
+    return state.waterDebuff === value;
+  }
+
+  if (phase === "water") {
+    return state.fireDebuff === value;
   }
 
   return false;
+}
+
+function normalizeState() {
+  // 同じGC内で加速度と雷/水圧縮が同時に残らないようにする
+  if (state.gc1Accel.includes("accel") && state.gc1Element) {
+    state.gc1Element = null;
+  }
+
+  if (state.gc2Accel.includes("accel") && state.gc2Element) {
+    state.gc2Element = null;
+  }
+
+  // 加速度はGC1/GC2のどちらか一方だけ
+  if (state.gc1Accel.includes("accel") && state.gc2Accel.includes("accel")) {
+    state.gc2Accel = [];
+  }
+
+  // 雷/水圧縮はGC1/GC2のどちらか一方だけ
+  if (state.gc1Element && state.gc2Element) {
+    state.gc2Element = null;
+  }
+
+  if (state.fireDebuff && state.waterDebuff && state.fireDebuff === state.waterDebuff) {
+    state.waterDebuff = null;
+  }
 }
 
 function syncButtons() {
@@ -497,7 +551,7 @@ function syncButtons() {
 
 function isComplete(phase) {
   if (phase.type === "multi") return (state[phase.accelKey].length > 0 || Boolean(state[phase.elementKey])) && Boolean(state[phase.timingKey]) && state[phase.truthKey] !== null;
-  if (phase.type === "fixed") return state[phase.truthKey] !== null;
+  if (phase.type === "fixed") return Boolean(state[phase.debuffKey]) && state[phase.truthKey] !== null;
   if (phase.type === "gc3") return Boolean(state[phase.colorKey]) && Boolean(state[phase.lifeKey]) && state[phase.truthKey] !== null;
   return false;
 }
@@ -507,11 +561,13 @@ function missingItems() {
   if (state.gc1Accel.length === 0 && !state.gc1Element) items.push("GC1");
   if (!state.gc1Timing) items.push("GC1早遅");
   if (state.gc1Truth === null) items.push("GC1真偽");
-  if (state.fireTruth === null) items.push("炎真偽");
+  if (!state.fireDebuff) items.push("ほのおデバフ");
+  if (state.fireTruth === null) items.push("ほのお真偽");
   if (state.gc2Accel.length === 0 && !state.gc2Element) items.push("GC2");
   if (!state.gc2Timing) items.push("GC2早遅");
   if (state.gc2Truth === null) items.push("GC2真偽");
-  if (state.waterTruth === null) items.push("水真偽");
+  if (!state.waterDebuff) items.push("つなみデバフ");
+  if (state.waterTruth === null) items.push("つなみ真偽");
   if (!state.gc3Color || !state.gc3Life || state.gc3Truth === null) items.push("GC3");
   return items;
 }
@@ -536,7 +592,7 @@ function compute(phase) {
   if (phase.type === "fixed") {
     if (!isComplete(phase)) return { state:"未入力", action:"未入力" };
     return {
-      state:truthText(state[phase.truthKey]),
+      state:`${debuffs[state[phase.debuffKey]].short} ${truthText(state[phase.truthKey])}`,
       action:""
     };
   }
@@ -650,16 +706,38 @@ function curseAction(truthKey) {
   return state[truthKey] ? "見ない" : "見る";
 }
 
-function fixedAction(fixedDebuff, truthKey, prefix) {
-  if (state[truthKey] === null) return "未入力";
+function fixedAction(debuffOrStateKey, truthKey, prefix) {
+  const fixedDebuff = state[debuffOrStateKey] || debuffOrStateKey;
+  if (!fixedDebuff || state[truthKey] === null) return "未入力";
+
   const truth = state[truthKey];
   const key = truth ? "true" : "false";
+  const action = `${debuffs[fixedDebuff].short}：${debuffs[fixedDebuff].result[key]}`;
 
   if (!prefix) {
-    return debuffs[fixedDebuff].result[key];
+    return action;
   }
 
-  return `${prefix} + ${debuffs[fixedDebuff].result[key]}`;
+  return `${prefix} + ${action}`;
+}
+
+function truthKeyForChaosDebuff(targetDebuff) {
+  if (state.fireDebuff === targetDebuff) return "fireTruth";
+  if (state.waterDebuff === targetDebuff) return "waterTruth";
+  return null;
+}
+
+function fixedChaosAction(targetDebuff) {
+  const truthKey = truthKeyForChaosDebuff(targetDebuff);
+  if (!truthKey || state[truthKey] === null) return "未入力";
+
+  const key = state[truthKey] ? "true" : "false";
+  return debuffs[targetDebuff].result[key];
+}
+
+function isChaosDebuffReady(targetDebuff) {
+  const truthKey = truthKeyForChaosDebuff(targetDebuff);
+  return Boolean(truthKey) && state[truthKey] !== null;
 }
 
 function isGcInputReady(prefix) {
@@ -703,13 +781,13 @@ function isStageDone(stageId) {
     case "gc1-curse":
       return state.gc1Truth !== null;
     case "fire":
-      return state.fireTruth !== null;
+      return isChaosDebuffReady("chaosFire");
     case "late-main":
       return areGcInputsReady();
     case "gc2-curse":
       return state.gc2Truth !== null;
     case "water":
-      return state.waterTruth !== null;
+      return isChaosDebuffReady("chaosWater");
     default:
       return false;
   }
@@ -737,7 +815,7 @@ function processStages() {
     {
       id:"fire",
       name:"ほのお",
-      action:`<span class="check-action">サンダガ確認</span>\n${fixedAction("chaosFire", "fireTruth", "")}`
+      action:`<span class="check-action">サンダガ確認</span>\n${fixedChaosAction("chaosFire")}`
     },
     {
       id:"late-main",
@@ -752,7 +830,7 @@ function processStages() {
     {
       id:"water",
       name:"つなみ",
-      action:fixedAction("chaosWater", "waterTruth", "")
+      action:fixedChaosAction("chaosWater")
     }
   ];
 }
@@ -772,6 +850,18 @@ function render() {
   const extraWarnings = [];
   if (state.gc1Accel.length === 0 && state.gc2Accel.length === 0) {
     extraWarnings.push("加速度はGC1かGC2のどちらかに必ず付く");
+  }
+  if (!state.gc1Element && !state.gc2Element) {
+    extraWarnings.push("雷or水圧縮は加速度がない方に付く");
+  }
+  if (
+    (state.gc1Accel.length > 0 && state.gc1Element) ||
+    (state.gc2Accel.length > 0 && state.gc2Element)
+  ) {
+    extraWarnings.push("加速度と雷/水圧縮は同じ回には付かない");
+  }
+  if (!state.fireDebuff || !state.waterDebuff) {
+    extraWarnings.push("ほのお/つなみで炎と水を1回ずつ選ぶ");
   }
   const warnTexts = [];
   if (missing.length) warnTexts.push(`未入力：${missing.join(" / ")}`);
@@ -811,11 +901,13 @@ function resetAll() {
   state.gc1Element = null;
   state.gc1Timing = null;
   state.gc1Truth = null;
+  state.fireDebuff = null;
   state.fireTruth = null;
   state.gc2Accel = [];
   state.gc2Element = null;
   state.gc2Timing = null;
   state.gc2Truth = null;
+  state.waterDebuff = null;
   state.waterTruth = null;
   state.gc3Color = null;
   state.gc3Life = null;
