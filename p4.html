@@ -561,13 +561,13 @@ function missingItems() {
   if (state.gc1Accel.length === 0 && !state.gc1Element) items.push("GC1");
   if (!state.gc1Timing) items.push("GC1早遅");
   if (state.gc1Truth === null) items.push("GC1真偽");
-  if (!state.fireDebuff) items.push("ほのおデバフ");
-  if (state.fireTruth === null) items.push("ほのお真偽");
+  if (!state.fireDebuff) items.push("ほのおorつなみ");
+  if (state.fireTruth === null) items.push("ほのおorつなみ真偽");
   if (state.gc2Accel.length === 0 && !state.gc2Element) items.push("GC2");
   if (!state.gc2Timing) items.push("GC2早遅");
   if (state.gc2Truth === null) items.push("GC2真偽");
-  if (!state.waterDebuff) items.push("つなみデバフ");
-  if (state.waterTruth === null) items.push("つなみ真偽");
+  if (!state.waterDebuff) items.push("ほのおorつなみ");
+  if (state.waterTruth === null) items.push("ほのおorつなみ真偽");
   if (!state.gc3Color || !state.gc3Life || state.gc3Truth === null) items.push("GC3");
   return items;
 }
