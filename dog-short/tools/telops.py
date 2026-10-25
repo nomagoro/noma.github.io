@@ -18,9 +18,11 @@ def outlined(draw, xy, text, f, fill, stroke, sw, anchor="mm"):
 def caption(name, lines, y=1380, accent=False):
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
+    yy = y
     for i, (text, size) in enumerate(lines):
         f = font(size)
-        yy = y + i * int(size * 1.35)
+        if i:
+            yy += int((lines[i - 1][1] + size) * 0.67)
         # soft drop shadow, then thick outline
         outlined(d, (W // 2 + 6, yy + 8), text, f, (0, 0, 0, 90), (0, 0, 0, 90), 16)
         outlined(d, (W // 2, yy), text, f, ORANGE if (accent and i == 0) else (255, 255, 255, 255), BROWN, 14)
@@ -30,7 +32,7 @@ def header(name):
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     f = font(54)
-    text = "柴犬パピーの日常"
+    text = "豆柴パピーの日常"
     l, t, r, b = d.textbbox((W // 2, 500), text, font=f, anchor="mm")
     d.rounded_rectangle((l - 44, t - 26, r + 44, b + 26), radius=60, fill=CREAM, outline=BROWN, width=6)
     d.text((W // 2, 500), text, font=f, fill=BROWN, anchor="mm")
@@ -39,11 +41,11 @@ def header(name):
 def endcard(name):
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    outlined(d, (W // 2, 500), "審査結果", font(72), CREAM, BROWN, 12)
+    outlined(d, (W // 2, 500), "寝床づくりの結果", font(68), CREAM, BROWN, 12)
     f = font(150)
-    outlined(d, (W // 2 + 8, 970), "保留ｗ", f, (0, 0, 0, 90), (0, 0, 0, 90), 22)
-    outlined(d, (W // 2, 960), "保留ｗ", f, ORANGE, BROWN, 20)
-    outlined(d, (W // 2, 1380), "ベッドより床派でした", font(64), (255, 255, 255, 255), BROWN, 12)
+    outlined(d, (W // 2 + 8, 970), "放置ｗ", f, (0, 0, 0, 90), (0, 0, 0, 90), 22)
+    outlined(d, (W // 2, 960), "放置ｗ", f, ORANGE, BROWN, 20)
+    outlined(d, (W // 2, 1380), "掘るだけ掘って去っていきました", font(58), (255, 255, 255, 255), BROWN, 12)
     outlined(d, (W // 2, 1500), "▶ チャンネル登録してね", font(52), CREAM, BROWN, 10)
     img.save(f"{OUT}/{name}.png")
 

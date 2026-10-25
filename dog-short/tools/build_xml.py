@@ -63,7 +63,7 @@ def vtrack(items):
     return f"<track>{items}<enabled>TRUE</enabled><locked>FALSE</locked></track>"
 
 xml = ('<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE xmeml>\n<xmeml version="4">'
-       f'<sequence id="seq-1"><name>柴犬ショート_新しいベッド審査</name><duration>{END}</duration>{rate()}'
+       f'<sequence id="seq-1"><name>豆柴ショート_新しいベッドで寝床づくり</name><duration>{END}</duration>{rate()}'
        "<timecode><rate><timebase>60</timebase><ntsc>FALSE</ntsc></rate><string>00:00:00:00</string>"
        "<frame>0</frame><displayformat>NDF</displayformat></timecode>"
        f"<media><video><format>{vfmt()}</format>{vtrack(v1)}{vtrack(v2)}{vtrack(v3)}</video>"
