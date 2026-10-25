@@ -9,11 +9,11 @@ YouTubeショート用（縦 1080×1920 / 60fps / 13.5秒）の編集素材一�
 | `shiba_short_premiere.xml` | **Premiere Pro用シーケンス**（Final Cut Pro XML形式） |
 | `shiba_short_preview.mp4` | テロップ入り完成見本（このままアップロードも可） |
 | `shiba_short_captions.srt` | テロップの字幕ファイル（Premiereで文字を直接編集したい場合用） |
-| `media/shiba_bed_vertical_master.mp4` | 元動画を縦型に切り抜き＆HDR→SDR変換した素材（音量+14dB） |
+| `media/shiba_bed_vertical_master.mp4` | 元動画の画角全体を縦型に収めた素材（上下黒帯・HDR→SDR変換・音量+14dB） |
 | `media/endcard_freeze.png` | ラストの静止画（空っぽのベッド） |
 | `media/telop/*.png` | テロップ画像（透過PNG・1080×1920） |
 | `fonts/MPLUSRounded1c-ExtraBold.ttf` | テロップで使ったフォント（M PLUS Rounded 1c / SIL OFL） |
-| `tools/` | テロップ画像・XMLを再生成するスクリプト |
+| `tools/` | テロップ画像・XML・見本動画を再生成するスクリプト |
 
 ## Premiere Proでの開き方
 
@@ -51,7 +51,7 @@ YouTubeショート用（縦 1080×1920 / 60fps / 13.5秒）の編集素材一�
 
 - **BGM**：元の音はほぼ環境音だけなので、YouTubeの「オーディオライブラリ」やショートの楽曲追加機能で、ポップで軽い曲を付けるのがおすすめ（元音は -10dB 程度に下げる）
 - **効果音**：「お？」(9.6秒)に「ポン」、脱走(10.6秒)に「シュッ」、「保留ｗ」(11.5秒)に「チーン」などを入れるとテンポが良くなります
-- 画面下20%と右端はショートのUI（タイトル・ボタン）に隠れるため、テロップはその外に配置済みです
+- 元動画の画角を切らずに見せるため上下は黒帯です。ヘッダーは上の黒帯、テロップは下の黒帯（ショートのUIに隠れない高さ）に配置しています
 
 ## YouTube投稿用テキスト案
 

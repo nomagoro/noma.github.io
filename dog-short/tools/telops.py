@@ -15,7 +15,7 @@ def font(size):
 def outlined(draw, xy, text, f, fill, stroke, sw, anchor="mm"):
     draw.text(xy, text, font=f, fill=fill, stroke_width=sw, stroke_fill=stroke, anchor=anchor)
 
-def caption(name, lines, y=1330, accent=False):
+def caption(name, lines, y=1380, accent=False):
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     for i, (text, size) in enumerate(lines):
@@ -31,20 +31,20 @@ def header(name):
     d = ImageDraw.Draw(img)
     f = font(54)
     text = "柴犬パピーの日常"
-    l, t, r, b = d.textbbox((W // 2, 250), text, font=f, anchor="mm")
+    l, t, r, b = d.textbbox((W // 2, 500), text, font=f, anchor="mm")
     d.rounded_rectangle((l - 44, t - 26, r + 44, b + 26), radius=60, fill=CREAM, outline=BROWN, width=6)
-    d.text((W // 2, 250), text, font=f, fill=BROWN, anchor="mm")
+    d.text((W // 2, 500), text, font=f, fill=BROWN, anchor="mm")
     img.save(f"{OUT}/{name}.png")
 
 def endcard(name):
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    outlined(d, (W // 2, 820), "審査結果", font(72), CREAM, BROWN, 12)
+    outlined(d, (W // 2, 500), "審査結果", font(72), CREAM, BROWN, 12)
     f = font(150)
-    outlined(d, (W // 2 + 8, 1010), "保留ｗ", f, (0, 0, 0, 90), (0, 0, 0, 90), 22)
-    outlined(d, (W // 2, 1000), "保留ｗ", f, ORANGE, BROWN, 20)
-    outlined(d, (W // 2, 1250), "ベッドより床派でした", font(64), (255, 255, 255, 255), BROWN, 12)
-    outlined(d, (W // 2, 1420), "▶ チャンネル登録してね", font(52), CREAM, BROWN, 10)
+    outlined(d, (W // 2 + 8, 970), "保留ｗ", f, (0, 0, 0, 90), (0, 0, 0, 90), 22)
+    outlined(d, (W // 2, 960), "保留ｗ", f, ORANGE, BROWN, 20)
+    outlined(d, (W // 2, 1380), "ベッドより床派でした", font(64), (255, 255, 255, 255), BROWN, 12)
+    outlined(d, (W // 2, 1500), "▶ チャンネル登録してね", font(52), CREAM, BROWN, 10)
     img.save(f"{OUT}/{name}.png")
 
 caps = json.load(open(sys.argv[3]))
